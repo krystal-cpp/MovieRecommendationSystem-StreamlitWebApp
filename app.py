@@ -12,10 +12,15 @@ except Exception as e:
     st.error(f"❌ Failed to load movies.pkl: {e}")
     
 try:
-    tfidf = TfidfVectorizer(max_features=10000, stop_words='english')
-    vectors = tfidf.fit_transform(movies['tags']).toarray()
-    similarity = cosine_similarity(vectors)
-    st.success("✅ Similarity matrix calculated.")
+    st.write("📊 Checking if 'tags' column exists in DataFrame...")
+    if 'tags' not in movies.columns:
+        st.error("❌ Column 'tags' not found in movies.pkl! Please preprocess the data correctly.")
+    else:
+        st.success("✅ 'tags' column found.")
+        tfidf = TfidfVectorizer(max_features=10000, stop_words='english')
+        vectors = tfidf.fit_transform(movies['tags']).toarray()
+        similarity = cosine_similarity(vectors)
+        st.success("✅ Similarity matrix calculated.")
 except Exception as e:
     st.error(f"❌ Failed to compute similarity: {e}")
 
