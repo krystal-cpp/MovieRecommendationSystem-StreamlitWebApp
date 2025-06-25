@@ -1,9 +1,13 @@
 import streamlit as st
 import pickle
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 movies = pickle.load(open('movies.pkl','rb'))
-similarity = pickle.load(open('similarity.pkl','rb'))
+tfidf = TfidfVectorizer(max_features=10000, stop_words='english')
+vectors = tfidf.fit_transform(movies['tags']).toarray()
+similarity = cosine_similarity(vectors)
 
 def recommend(movie):
     movie = movie.lower()
