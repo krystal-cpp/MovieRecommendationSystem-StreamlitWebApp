@@ -4,10 +4,20 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-movies = pickle.load(open('movies.pkl','rb'))
-tfidf = TfidfVectorizer(max_features=10000, stop_words='english')
-vectors = tfidf.fit_transform(movies['tags']).toarray()
-similarity = cosine_similarity(vectors)
+st.title("Movie Recommendation System")
+try:
+    movies = pickle.load(open('movies.pkl','rb'))
+    st.success("✅ movies.pkl loaded successfully.")
+except Exception as e:
+    st.error(f"❌ Failed to load movies.pkl: {e}")
+    
+try:
+    tfidf = TfidfVectorizer(max_features=10000, stop_words='english')
+    vectors = tfidf.fit_transform(movies['tags']).toarray()
+    similarity = cosine_similarity(vectors)
+    st.success("✅ Similarity matrix calculated.")
+except Exception as e:
+    st.error(f"❌ Failed to compute similarity: {e}")
 
 def recommend(movie):
     movie = movie.lower()
@@ -21,7 +31,6 @@ def recommend(movie):
     recommendations = recommendations.sort_values(by='vote_count', ascending=False)
     return recommendations['original_title'].head(5).tolist()
 
-st.title('Movie Recommendation System')
 selected_movie = st.text_input('Enter a movie title.', '')
 
 if(st.button('Recommend')):
