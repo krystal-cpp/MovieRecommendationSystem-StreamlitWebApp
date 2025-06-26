@@ -56,8 +56,8 @@ The project is ideal for demonstrating practical NLP, vectorization, and recomme
 
 ## 🧪 Getting Started Locally
 ```bash
-git clone https://github.com/yourusername/movie-recommender-tfidf.git
-cd movie-recommender-tfidf
+git clone https://github.com/krystal-cpp/MovieRecommendationSystem-StreamlitWebApp.git
+cd MovieRecommendationSystem-StreamlitWebApp
 pip install -r requirements.txt
 streamlit run app.py
 ```
