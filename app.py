@@ -1,28 +1,39 @@
 import streamlit as st
 import pickle
+import gdown
+import os
+from dotenv import load_dotenv
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 st.title("Movie Recommendation System")
-try:
-    movies = pickle.load(open('movies.pkl','rb'))
-    st.success("✅ movies.pkl loaded successfully.")
-except Exception as e:
-    st.error(f"❌ Failed to load movies.pkl: {e}")
-    
-try:
-    st.write("📊 Checking if 'tags' column exists in DataFrame...")
-    if 'tags' not in movies.columns:
-        st.error("❌ Column 'tags' not found in movies.pkl! Please preprocess the data correctly.")
-    else:
-        st.success("✅ 'tags' column found.")
-        tfidf = TfidfVectorizer(max_features=10000, stop_words='english')
-        vectors = tfidf.fit_transform(movies['tags']).toarray()
-        similarity = cosine_similarity(vectors)
-        st.success("✅ Similarity matrix calculated.")
-except Exception as e:
-    st.error(f"❌ Failed to compute similarity: {e}")
+
+load_dotenv()
+
+@st.cache_resource
+def load_movies():
+    return pickle.load(open('movies.pkl','rb'))
+
+@st.cache_resource
+def load_similarity():
+    url = os.getenv("SIMILARITY_URL")
+    if not os.path.exists("similarity.pkl"):
+        gdown.download(url, "similarity.pkl", quiet=False)
+    return pickle.load(open('similarity.pkl','rb'))
+
+if "data_loaded" not in st.session_state:
+    try:
+        movies = load_movies()
+        similarity = load_similarity()
+        st.session_state["data_loaded"]=True
+        st.toast("✅ Data loaded successfully")
+    except Exception as e:
+        st.toast(f"❌ Failed to load: {e}")
+        st.stop()
+else:
+    movies = load_movies()
+    similarity = load_similarity()
 
 def recommend(movie):
     movie = movie.lower()
