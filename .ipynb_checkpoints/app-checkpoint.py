@@ -1,39 +1,36 @@
 import streamlit as st
 import pickle
-import gdown
-import os
-from dotenv import load_dotenv
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 st.title("Movie Recommendation System")
 
-load_dotenv()
-
 @st.cache_resource
-def load_movies():
-    return pickle.load(open('movies.pkl','rb'))
+def load_data():
+    movies = pickle.load(open('movies.pkl','rb'))
+    movies = movies[movies['tags'].notna()].reset_index(drop=True)
+    tfidf = TfidfVectorizer(stop_words="english")
+    tfidf_matrix = tfidf.fit_transform(movies['tags'])
+    return movies, tfidf_matrix
 
-@st.cache_resource
-def load_similarity():
-    url = os.getenv("SIMILARITY_URL")
-    if not os.path.exists("similarity.pkl"):
-        gdown.download(url, "similarity.pkl", quiet=False)
-    return pickle.load(open('similarity.pkl','rb'))
+@st.cache_data
+def compute_similarity(_tfidf_matrix):
+    return cosine_similarity(_tfidf_matrix)
 
 if "data_loaded" not in st.session_state:
     try:
-        movies = load_movies()
-        similarity = load_similarity()
+        movies, tfidf_matrix = load_data()
+        st.toast("✅ Data loaded successfully.")
+        similarity = compute_similarity(tfidf_matrix)
         st.session_state["data_loaded"]=True
-        st.toast("✅ Data loaded successfully")
+        st.toast("✅ Similarity computed successfully.")
     except Exception as e:
         st.toast(f"❌ Failed to load: {e}")
         st.stop()
 else:
-    movies = load_movies()
-    similarity = load_similarity()
+    movies, tfidf_matrix = load_data()
+    similarity = compute_similarity(tfidf_matrix)
 
 def recommend(movie):
     movie = movie.lower()

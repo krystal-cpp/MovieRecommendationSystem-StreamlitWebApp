@@ -2,5 +2,3 @@ streamlit
 pandas
 scikit-learn
 numpy
-gdown
-python-dotenv
